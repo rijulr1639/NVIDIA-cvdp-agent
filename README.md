@@ -28,22 +28,28 @@ This agent solves Verilog design problems from the CVDP benchmark — RTL repair
 | WSL 2 + Ubuntu 22.04 | `wsl --install -d Ubuntu-22.04` (Windows PowerShell) |
 | Docker Desktop | [docker.com/products/docker-desktop](https://www.docker.com/products/docker-desktop/) — then enable **Settings → Resources → WSL Integration → Ubuntu-22.04** |
 | Node.js (in WSL) | `curl -fsSL https://deb.nodesource.com/setup_lts.x \| sudo -E bash - && sudo apt install -y nodejs` |
-| Codex CLI (in WSL) | `npm install -g @openai/codex` |
-| OpenAI API key | **ASU students:** `codex login` (uses your ASU OpenAI account). **Others:** `export OPENAI_API_KEY=sk-...` (add to `~/.bashrc` to persist) |
+| Codex CLI (in WSL) | `sudo npm install -g @openai/codex@latest` |
+| OpenAI API key | **ASU students:** `/usr/bin/codex login` (uses your ASU OpenAI account). **Others:** `export OPENAI_API_KEY=sk-...` (add to `~/.bashrc` to persist) |
 | iverilog (in WSL) | `sudo apt install -y iverilog` |
 | Python 3.10+ (in WSL) | usually pre-installed; check with `python3 --version` |
 
 > **Note on the OpenAI model:** Results in this repo used `gpt-5.4` via the ASU OpenAI account. Any key with access to a capable model (gpt-4o, gpt-4.1, o3, etc.) will work — Codex picks up whatever your account's default model is.
 
+> **WSL distro warning:** Make sure you open the correct WSL distro. In PowerShell run `wsl -d Ubuntu-22.04` — do NOT use the `docker-desktop` distro (it has no git, no Python, and is Docker's internal container).
+
+> **Codex path warning:** If you have Codex installed on Windows as well, WSL may pick up the Windows binary. Always use the full path `/usr/bin/codex` or verify with `which codex` that it points to `/usr/bin/codex`.
+
 ### One-time setup (run once in WSL)
 
 ```bash
-cd /mnt/c/path/to/NVIDIA-cvdp-agent   # adjust to where you cloned the repo
+git clone https://github.com/rijulr1639/NVIDIA-cvdp-agent.git
+cd NVIDIA-cvdp-agent
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements-harness.txt
 echo '{"auths":{}}' > ~/.docker/config.json     # fix ghcr.io credential helper in WSL
 docker pull ghcr.io/hdl/sim/osvb
 docker build -t cvdp-relay-agent:latest -f docker/Dockerfile-agent docker/
+/usr/bin/codex login                             # log in with your OpenAI / ASU account
 ```
 
 ### Run the full pipeline (Phase A + B) on one problem
